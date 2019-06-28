@@ -7,27 +7,14 @@ use binomtest;
 
 #use Math::CDF;
 #use Statistics::R;
+
+#$R->stopR();
 our %self_dist=();
 our $keycol=6;
-our $start=0.1;
-our $step=0.02;
-our $NR=(1-$start)/$step+1;
-print "Totally bins ".$NR."\n";
-if(@ARGV<4){
-	print "more input is required\n
-	Input format: fin fped transcript outpredix\n";
-	exit;
-}
+our $start=0.1;  ## mimum interested variants' revel 
+our $step=0.02; ## step of revel to lookup
+our $NR=(1-$start)/$step+1; ## based on start and step, the total number of bins can be calculated.
 
-print "Input: ".join(" ",@ARGV)."\n";
-my $fin=$ARGV[0]; #"/home/local/ARCS/nz2274/PAH/PAH_10032017/hg38/VAT/test.vcf.gz";
-my $fped=$ARGV[1]; #;"/home/local/ARCS/nz2274/PAH/PAH_10032017/src/EUR.case_control.affected.ped";
-my $ftrans=$ARGV[2];
-my $prefix=$ARGV[3];
-#my $trans=$ARGV[4];
-#our $R = Statistics::R->new();
-main($fin,$fped,$ftrans,$prefix);
-#$R->stopR();
 sub generate_arr {
   my $cnt=$_[0];
   my $mp=$_[1];
@@ -351,3 +338,41 @@ sub main {
 }
 
 ## /home/local/ARCS/nz2274/PAH/PAH_10032017/Result/Type1_Error/data/refGene_mRNA_protein_coding_hg37_Ensemble95_4VT.cannoical.bed
+
+print "Warning: Before runing the script, please add the binomtest.pm to your perl library\n";
+
+if(@ARGV<4){
+	print "more input is required\n
+	Input format: fin fped transcript outpredix\n";
+	exit;
+}
+
+
+
+print "Warning: the input required specific format, it is tab-delimited\n";
+print "Warning: it has to include: #CHR,POS,END,REF,ALT,GENENAME,REVEL,MCAP,CADD,FORMTAT,INDIVIDUAL.......\n";
+print "Warning: please see the example input in the test file\n";
+
+print "Warning: the input pedigree file must have two columns, tab-delimited,ID\tcoded_ohenotype.  1=healthy, 2=affected\n";
+print "Warning: the input transcript file must follow the format: Name\\tregion1 region2......\n";
+
+print "Warning: please see the example in the test folder, before runing the script\n";
+
+my $fin=$ARGV[0]; 
+if ( !-f "$fin.tbi"){
+	print "Error: the input file has to be tabixed file\n";
+	exit;
+}
+print "Totally bins ".$NR."\n";
+print "Input: ".join(" ",@ARGV)."\n";
+
+# required tabixed .gz file, it is required specific format, tab-delimited #CHR,POS,END,REF,ALT,GENENAME,REVEL,MCAP,CADD,FORMTAT,INDIVIDUAL....... 
+# Genotype code: 0-> reference, 1-> heterozygous 2-> homozygous 
+my $fped=$ARGV[1]; 
+## required ID and phenotype 1-> healthy 2-> affected
+my $ftrans=$ARGV[2];
+## transcript region file: Name\tchr1:pos1-pos2 chr1:pos3-pos4.....
+my $prefix=$ARGV[3];
+## prefix for the output
+
+main($fin,$fped,$ftrans,$prefix);
